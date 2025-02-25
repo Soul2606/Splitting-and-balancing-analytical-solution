@@ -1,0 +1,138 @@
+body{
+    background-color: rgb(38, 39, 41);
+}
+
+p{
+    color: white;
+}
+
+#main-grid{
+    width: 10px;
+    min-width: 98%;
+    display: grid;
+    gap: 15px;
+    grid-template-columns: repeat(auto-fit, 200px);
+    border: none;
+    border-left: solid 1px white;
+    padding: 5px;
+    margin-bottom: 5px;
+    background-color: darkslateblue;
+}
+
+#add-input-lane-button{
+    height: 50px;
+    min-width: 200px;
+    border: solid white 1px;
+}
+
+#add-input-lane-button:hover{
+    background-color: darkorange;
+}
+
+#add-balancer-button{
+    padding: 0 15px;
+    border: solid white 1px;
+    background-color: darkolivegreen;
+}
+
+#add-balancer-button:hover{
+    background-color: rgb(119, 150, 66);
+}
+
+#add-loop-back-button{
+    padding: 0 15px;
+    border: solid white 1px;
+    background-color: darkorchid;
+}
+
+#add-loop-back-button:hover{
+    background-color: orchid;
+}
+
+.input-flow-display{
+    height: 50px;
+    min-width: 200px;
+    grid-row: 1/2;
+    border: solid white 1px;
+    background-color: rgb(55, 177, 224);
+}
+
+.flow-display{
+    height: 50px;
+}
+
+.balancer{
+    background-color: darkolivegreen;
+}
+
+.loop-back{
+    background-color: darkorchid;
+}
+
+.adjustable-spanner{
+    min-height: 100px;
+}
+
+.adjustable-spanner-button-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    margin: 5px 0;
+}
+
+.adjustable-spanner-button{
+    width: 25px;
+    height: 25px;
+    border: solid white 1px;
+}
+
+.loop-back-right{
+    background: rgb(50,35,50);
+    background: linear-gradient(90deg, rgba(50,35,50,1) 0%, rgba(229,114,255,1) 100%);
+}
+
+.loop-back-left{
+    background: rgb(229,114,255);
+    background: linear-gradient(90deg, rgba(229,114,255,1) 0%, rgba(50,35,50,1) 100%);
+}
+
+.loop-back-target{
+    height: 100px;
+    width: 200px;
+    border: solid white 1px;
+    background-color: rgb(175, 101, 175);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drag-button{
+    width: 50px;
+    height: 50px;
+    border: solid white 1px;
+}
+
+.balancer-flow-display-container{
+    display: flex;
+    justify-content: space-between;
+}
+
+.balancer-flow-display{
+    box-sizing: border-box;
+    height: 20px;
+    width: 200px;
+    border: solid white 1px;
+    background-color: rgb(55, 177, 224);
+}
+
+.balancer-flow-display-disabled{
+    background-color: gray;
+}
+
+.flow-visualizer{
+    height: 100%;
+    width: 20px;
+    z-index: 9999;
+    background-color: rgb(55, 177, 224);
+}
