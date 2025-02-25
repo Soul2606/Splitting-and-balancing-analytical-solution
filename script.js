@@ -5,7 +5,7 @@
 
 
 class Fraction {
-    constructor(numerator, denominator) {
+    constructor(numerator = 0, denominator = 1) {
     this.numerator = numerator        
     this.denominator = denominator        
     }
@@ -60,48 +60,29 @@ class Fraction {
     toString(){
         return `${this.numerator}/${this.denominator}`
     }
+
+    // Farey addition, also known as naive addition
+    farey(value){
+        if (value instanceof Fraction) {
+            this.numerator += value.numerator
+            this.denominator += value.denominator
+        }else if (typeof value === 'number') {
+            this.numerator += value
+            this.denominator += 1
+        }
+        return this
+    }
 }
 
 
 
 
-class Doubly_linked_balancer_part_transfer_chain_info {
-	constructor(termination, reference, success) {
-		this.termination = termination
-		if (termination === 'loop') {
-			this.chain = []
-		}else{
-			this.chain = [{reference, success, variable_transferred:null}]
-		}
+class Doubly_linked_balancer_part_flow_value{
+	constructor(name = '', value = new Fraction()) {
+        this.name = name
+        this.value = value
 	}
 
-	add_to_chain(reference, success, variable_transferred){
-		this.chain.unshift({reference,success,variable_transferred})
-		return this.chain
-	}
-
-	is_latest_transfer_successful(){
-		if (this.chain.length > 0) {
-			return this.chain[0].success
-		} else if (this.termination === 'loop') {
-			return true
-		}{
-			console.warn('empty chain without hitting a loop', this)
-			return false
-		}
-	}
-
-	get_reference_chain(){
-		return this.chain.map(element=>element.reference)
-	}
-
-	get_transfer_chain(){
-		return this.chain.map(element=>element.variable_transferred)
-	}
-
-	get_success_chain(){
-		return this.chain.map(element=>element.success)
-	}
 }
 
 
@@ -111,12 +92,13 @@ const all_balancer_parts = []
 const balancer_part_targeted_by_limit = 2
 
 class Doubly_linked_balancer_part{
-	constructor(value, name){
+	constructor(outgoing_lanes_data = [], name){
 		//Name for debugging
 		this.name = name === undefined? '': String(name)
-		this.value = value? value: null
 		this.transfer_targets = []
 		this.targeted_by = []
+        this.incoming_lanes_data = []
+        this.outgoing_lanes_data = outgoing_lanes_data
 		all_balancer_parts.push(this)
 	}
 
@@ -129,6 +111,26 @@ class Doubly_linked_balancer_part{
 		}else{
 			all_balancer_parts.splice(index_of_this, 1)
 		}
+        for (const target of this.transfer_targets) {
+            if (target instanceof Doubly_linked_balancer_part) {
+                const index_of_this_in_targets_targeted_by = target.targeted_by.indexOf(this)
+                if (index_of_this_in_targets_targeted_by === -1) {
+                    console.warn('target did not have this in targeted by')
+                }else{
+                    target.targeted_by.splice(index_of_this_in_targets_targeted_by, 1)
+                }
+            }
+        }
+        for (const targeted_by of this.targeted_by) {
+            if (targeted_by instanceof Doubly_linked_balancer_part) {
+                const index_of_this_in_targeted_bys_transfer_targets = targeted_by.transfer_targets.indexOf(this)
+                if (index_of_this_in_targeted_bys_transfer_targets === -1) {
+                    console.warn('targeted_by did not have this in transfer_targets')
+                }else{
+                    targeted_by.transfer_targets.splice(index_of_this_in_targeted_bys_transfer_targets, 1)
+                }
+            }
+        }
 		// This object should now be in limbo and be removed by the garbage collector if no other instances of this object is in memory
 	}
 
@@ -204,14 +206,5 @@ class Doubly_linked_balancer_part{
 
 
 
-const balancer_part1 = new Doubly_linked_balancer_part('A', '1')
-const balancer_part2 = new Doubly_linked_balancer_part('B', '2')
-const balancer_part3 = new Doubly_linked_balancer_part('C', '3')
-const balancer_part4 = new Doubly_linked_balancer_part('D', '4')
 
-balancer_part1.add_target(balancer_part2)
-balancer_part1.add_target(balancer_part3)
-balancer_part2.add_target(balancer_part1)
-balancer_part3.add_target(balancer_part4)
 
-console.log(balancer_part1.search())
