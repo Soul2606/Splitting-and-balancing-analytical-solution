@@ -6,8 +6,15 @@
 
 class Fraction {
     constructor(numerator = 0, denominator = 1) {
-    this.numerator = numerator        
-    this.denominator = denominator        
+        if (typeof numerator === 'string') {
+            const split_string = numerator.split('/')
+            console.log(split_string)
+            this.numerator = Number(split_string[0])
+            this.denominator = Number(split_string[1])
+        }else{
+            this.numerator = numerator
+            this.denominator = denominator
+        }
     }
 
     value(){
@@ -208,3 +215,8 @@ class Doubly_linked_balancer_part{
 
 
 
+
+const balancer_part1 = new Doubly_linked_balancer_part([new Doubly_linked_balancer_part_flow_value('A', new Fraction(1,1))]);
+
+const fraction = new Fraction('1/2')
+console.log(fraction)
