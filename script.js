@@ -320,5 +320,36 @@ const balancer_part3 = new Linked_list_balancer_part('C');
 balancer_part1.add_target(balancer_part3)
 balancer_part2.add_target(balancer_part3)
 
-balancer_part3.calculate()
-console.log(balancer_part3)
+//balancer_part3.calculate()
+//console.log(balancer_part3)
+
+
+
+
+
+
+
+function divideNumber(number, array) {
+    // Create an array of objects with value and original index
+    let index_array = array.map((value, index)=>({value, index}))
+    
+    // Sort the result array in ascending order
+    index_array.sort((a, b) => a - b);
+
+    // Create a copy of the array to avoid mutating the original array
+    let result = new Array(array.length).fill(0);
+  
+    // Iterate over each element and divide the number equally
+    for (let i = 0; i < result.length; i++) {
+        let share = Math.min(number / (index_array.length - i), index_array[i].value);
+        result[index_array[i].index] = share;
+        number -= share;
+    
+        if (number <= 0) break;
+    }
+    
+    // Return the final array with the divided values
+    return result;
+}
+
+console.log(divideNumber(20,[20,2,3,2]))
