@@ -4,6 +4,63 @@
 
 
 
+class Fraction {
+    constructor(numerator, denominator) {
+    this.numerator = numerator        
+    this.denominator = denominator        
+    }
+
+    value(){
+        return this.numerator / this.denominator
+    }
+
+    // Greatest common divisor
+    gcd(a, b) {
+        return b ? this.gcd(b, a % b) : Math.abs(a);
+    }
+
+    // Reduces the fraction to its simplest from
+    reduce(){
+        const gcd = this.gcd(this.numerator, this.denominator)
+        this.numerator /= gcd
+        this.denominator /= gcd
+        return this
+    }
+
+    add(value){
+        if (value instanceof Fraction) {
+            this.numerator = (this.numerator * value.denominator) + (value.numerator * this.denominator)
+            this.denominator = this.denominator * value.denominator
+        }else if (typeof value === 'number') {
+            this.numerator += value * this.denominator
+        }
+        return this
+    }
+    
+    multiply(value){
+        if (value instanceof Fraction) {
+            this.numerator *= value.numerator
+            this.denominator *=value.denominator
+        }else if (typeof value === 'number') {
+            this.numerator *= value
+        }
+        return this
+    }
+
+    divide(value){
+        if (value instanceof Fraction) {
+            this.numerator *= value.denominator
+            this.denominator *=value.numerator
+        }else if (typeof value === 'number') {
+            this.denominator *= value
+        }
+        return this
+    }
+
+    toString(){
+        return `${this.numerator}/${this.denominator}`
+    }
+}
 
 
 
