@@ -19,6 +19,10 @@ class Fraction {
         }
     }
 
+    clone(){
+        return new Fraction(this.numerator, this.denominator);
+    }
+
     value(){
         return this.numerator / this.denominator
     }
@@ -95,9 +99,37 @@ class Fraction {
     greater(value){
         if (value instanceof Fraction) {
             return this.numerator * value.denominator > this.denominator * value.numerator
+        }else if (typeof value === 'number'){
+            return this.numerator > this.denominator * value
         }
         return false
     }
+    
+    less(value){
+        if (value instanceof Fraction) {
+            return this.numerator * value.denominator < this.denominator * value.numerator
+        }else if (typeof value === 'number'){
+            return this.numerator < this.denominator * value
+        }
+        return false
+    }
+
+    max(value){
+        if (value.greater(this)) {
+            return value
+        }else{
+            return this
+        }
+    }
+    
+    min(value){        
+        if (value.less(this)) {
+            return value
+        }else{
+            return this
+        }
+    }
+
 }
 
 
@@ -232,7 +264,8 @@ class Linked_list_balancer_part{
         //This function constrains the values of balancer parts targeting this balancer part based on a bunch of conditions
         //The value of incoming 'lanes' is summed and divided by the amount of outgoing lanes. But outgoing lanes may not be grater than 1
         //If it is than the incoming lanes need to be reduced based on what the maximum expected value of each lane is, which is output_lanes / input_lanes. 
-        //Anything lower than this expected value does not need to be modified, bet everything else need to be subtracted equally. 
+        //Anything lower than this expected value does not need to be modified, but everything else need to be subtracted equally, but no so much that it would
+        // overshoot the maximum expected value. 
         const sum = new Fraction()
         const names = []
         for (const targeted_by of this.targeted_by) {
@@ -240,6 +273,8 @@ class Linked_list_balancer_part{
                 const outgoing_lane = targeted_by.outgoing_lanes_data
                 sum.add(outgoing_lane.value)
                 names.push(outgoing_lane.name)
+            }else{
+                throw new Error("Not targeted by an balancer part", this);
             }
         }
 
@@ -253,58 +288,39 @@ class Linked_list_balancer_part{
             // The fraction needed to be multiplied with the sum for it to be equal to 1
             const multiply_to_1_fraction = new Fraction(sum.denominator, sum.numerator)
             sum.multiply(multiply_to_1_fraction)
-            let stop = false
-            while (!stop) {                
-                const max_expected_value_per_input = new Fraction(output_lanes, this.targeted_by.length)
-                const difference_remaining_per_lane = new Fraction(difference_remaining)
-                difference_remaining_per_lane.divide(this.targeted_by.length)
-                let balancer_parts_outside_max = []
-                let lowest_value_outside_max = new Fraction(Infinity, 1)
-                for (const targeted_by of this.targeted_by) {
-                    if (targeted_by instanceof Linked_list_balancer_part) {
-                        if (targeted_by.outgoing_lanes_data.value.greater(difference_remaining_per_lane)) {
-                            balancer_parts_outside_max.push(targeted_by)
-                            if (lowest_value_outside_max.greater(targeted_by.outgoing_lanes_data.value)) {
-                                lowest_value_outside_max = new Fraction(targeted_by.outgoing_lanes_data.value)
-                            }
-                        }
-                    }
-                }
-                
-                console.log('max_expected_value_per_input', max_expected_value_per_input)
-                console.log('balancer_parts_outside_max', balancer_parts_outside_max)
-                console.log('difference_remaining_per_lane', difference_remaining_per_lane)
-                console.log('lowest_value_outside_max', lowest_value_outside_max)
-
-                if (balancer_parts_outside_max.length === 0) {
-                    break
-                }
-
-                const difference_remaining_per_lanes_outside_max = new Fraction(difference_remaining)
-                difference_remaining_per_lanes_outside_max.divide(balancer_parts_outside_max.length)
-    
-                if (lowest_value_outside_max.greater(difference_remaining_per_lanes_outside_max)) {
-                    console.log('condition passed')
-                    for (const balancer_part of balancer_parts_outside_max) {
-                        balancer_part.outgoing_lanes_data.value.subtract(lowest_value_outside_max)
-                        balancer_part.outgoing_lanes_data.maximum_value = balancer_part.outgoing_lanes_data.value
-                        difference_remaining.subtract(lowest_value_outside_max)
+            
+            const max_expected_value_per_input = new Fraction(output_lanes, this.targeted_by.length)
+            let balancer_parts_outside_max = []
+            for (const targeted_by of this.targeted_by) {
+                if (targeted_by instanceof Linked_list_balancer_part) {
+                    if (targeted_by.outgoing_lanes_data.value.greater(max_expected_value_per_input)) {
+                        balancer_parts_outside_max.push(targeted_by)
                     }
                 }else{
-                    console.log('condition failed')
-                    for (const balancer_part of balancer_parts_outside_max) {
-                        balancer_part.outgoing_lanes_data.maximum_value = new Fraction(difference_remaining).divide(balancer_parts_outside_max.length.length)
-                        balancer_part.outgoing_lanes_data.value = new Fraction(difference_remaining).divide(balancer_parts_outside_max.length.length)
-                    }
-                    stop = true
+                    throw new Error("Not targeted by an balancer part", this);
+                }
+            }
+            
+            console.log('max_expected_value_per_input', max_expected_value_per_input)
+            console.log('balancer_parts_outside_max', balancer_parts_outside_max)
+
+            const values_to_be_reduced_by = distribute_fraction_within_range(difference_remaining, balancer_parts_outside_max.map(part=>part.outgoing_lanes_data.value.clone().subtract(max_expected_value_per_input)))
+
+            balancer_parts_outside_max.forEach((element, index)=>{
+                element.outgoing_lanes_data.value.subtract(values_to_be_reduced_by[index])
+            })
+            
+            for (const balancer_part of this.targeted_by) {
+                if (balancer_part instanceof Linked_list_balancer_part) {
+                    balancer_part.outgoing_lanes_data.maximum_value = balancer_part.outgoing_lanes_data.value.max(max_expected_value_per_input)
+                }else{
+                    throw new Error("Not targeted by an balancer part", this);
                 }
             }
         }
         this.outgoing_lanes_data.value = sum
         this.outgoing_lanes_data.name = String(names)
     }
-
-
 
 }
 
@@ -314,22 +330,22 @@ class Linked_list_balancer_part{
 
 
 const balancer_part1 = new Linked_list_balancer_part('A', '1/1');
-const balancer_part2 = new Linked_list_balancer_part('B', '1/1');
-const balancer_part3 = new Linked_list_balancer_part('C');
+const balancer_part2 = new Linked_list_balancer_part('B', '1/2');
+const balancer_part_out = new Linked_list_balancer_part('OUT');
 
-balancer_part1.add_target(balancer_part3)
-balancer_part2.add_target(balancer_part3)
+balancer_part1.add_target(balancer_part_out)
+balancer_part2.add_target(balancer_part_out)
 
-//balancer_part3.calculate()
-//console.log(balancer_part3)
-
-
+balancer_part_out.calculate()
+console.log(balancer_part_out)
 
 
 
 
 
-function divideNumber(number, array) {
+
+
+function distribute_number_within_range(number, array) {
     // Create an array of objects with value and original index
     let index_array = array.map((value, index)=>({value, index}))
     
@@ -348,8 +364,36 @@ function divideNumber(number, array) {
         if (number <= 0) break;
     }
     
-    // Return the final array with the divided values
     return result;
 }
 
-console.log(divideNumber(20,[20,2,3,2]))
+
+
+//This function mutates the values in array and i dont know why
+function distribute_fraction_within_range(number, array) {
+    const fraction = new Fraction(number)
+    // Create an array of objects with value converted to fraction and original index
+    let index_array = array.map((value, index)=>({value:new Fraction(value), index}))
+
+    // Sort the result array in ascending order
+    index_array.sort((a, b) => a.value.value() - b.value.value());
+
+    // Create a copy of the array to avoid mutating the original array
+    let result = new Array(array.length).fill(0);
+  
+    // Iterate over each element and divide the fraction equally
+    for (let i = 0; i < result.length; i++) {
+        const fraction_clone = fraction.clone()
+        let share = fraction_clone.divide(index_array.length - i).min(index_array[i].value)
+        result[index_array[i].index] = share;
+        fraction.subtract(share);
+    
+        if (fraction <= 0) break;
+    }
+    
+    return result;
+}
+
+
+
+
